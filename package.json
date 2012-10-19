@@ -1,0 +1,24 @@
+{
+  "name": "bus",
+  "version": "0.1.0",
+  "description": "An event bus with wildcard matching",
+  "main": "bus.coffee",
+  "dependencies": {
+    "colors": "~0.6.0-1",
+    "fairmont": "~0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "coffee test.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dyoder/bus.git"
+  },
+  "keywords": [
+    "events",
+    "emitter"
+  ],
+  "author": "Dan Yoder",
+  "license": "BSD"
+}
