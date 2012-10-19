@@ -4,8 +4,8 @@
   "description": "An event bus with wildcard matching",
   "main": "bus.coffee",
   "dependencies": {
-    "colors": "~0.6.0-1",
-    "fairmont": "~0.1.0"
+    "colors": "~0.6.x",
+    "fairmont": "~0.1.x"
   },
   "devDependencies": {},
   "scripts": {
