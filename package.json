@@ -7,7 +7,9 @@
     "colors": "~0.6.x",
     "fairmont": "~0.1.x"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "testify": "0.1.0"
+  },
   "scripts": {
     "test": "coffee test.coffee"
   },
