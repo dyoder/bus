@@ -30,14 +30,15 @@ class Bus
     @_handlers = {}
     
   send: (qualifiedName,args...) ->
-    for specification,pattern of @_patterns
-      if pattern.match qualifiedName
-        for handler in @_handlers[specification]
-          handler args...
-          if handler.once 
-            @remove specification, handler
-    for receiver in @_receivers
-      receiver qualifiedName, args...
+    process.nextTick =>
+      for specification,pattern of @_patterns
+        if pattern.match qualifiedName
+          for handler in @_handlers[specification]
+            handler args...
+            if handler.once 
+              @remove specification, handler
+      for receiver in @_receivers
+        receiver qualifiedName, args...
             
   # alias for 'send'
   event: (args...) -> @send args...
