@@ -107,8 +107,9 @@ Testify.test "A Bus", (context) ->
     bus.once "foo.*", increment
     bus.remove "foo.*", increment
     bus.send "foo.bar"
-    context.test "does not fire", ->
-      assert.ok count is 0
+    process.nextTick ->
+      context.test "does not fire", ->
+        assert.ok count is 0
     
   context.test "with cascading events", (context) ->
     bus = new Bus
