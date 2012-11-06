@@ -75,18 +75,22 @@ Testify.test "A Bus", (context) ->
 
   context.test "with an event handler", (context) ->
     bus = new Bus
-    bus.on "foo.bar", ->
-      context.test "fires the event", ->
-        assert.ok true
-
-    bus.send "foo.bar"
+    flag = false
     
+    bus.on "foo.bar", -> flag = true
+    bus.send "foo.bar"
+    process.nextTick -> 
+      context.test "fires the event", -> 
+        assert.ok flag
+
   context.test "with a wild-card event handler", (context) ->
     bus = new Bus
-    bus.on "foo.*", ->
-      context.test "fires the event", ->
-        assert.ok true
+    flag = false
+    bus.on "foo.*", -> flag = true
     bus.send "foo.bar"
+    process.nextTick ->
+      context.test "fires the event", ->
+        assert.ok flag
     
   context.test "with a one-time event handler", (context) ->
     bus = new Bus
@@ -117,10 +121,12 @@ Testify.test "A Bus", (context) ->
 
     bus.on "foo", ->
       bus.event "bar"
+      
       process.nextTick ->
         context.test "fires them all", ->
           assert.ok flag
 
     bus.on "foo", ->
       bus.on "bar", ->  flag = true
+    
     bus.event "foo"
