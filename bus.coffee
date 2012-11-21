@@ -34,10 +34,12 @@ class Bus
       for specification,pattern of @_patterns
         if pattern.match qualifiedName
           handlers = @_handlers[specification].slice(0)
+          @_handlers[specification] = keepers = []
           for handler in handlers
+            unless handler.once
+              keepers.push(handler)
             handler args...
-            if handler.once 
-              @remove specification, handler
+
       for receiver in @_receivers
         receiver qualifiedName, args...
             
