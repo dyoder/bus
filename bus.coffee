@@ -40,8 +40,6 @@ class Bus
             unless handler.once
               keepers.push(handler)
             handler args...
-            if handler.once
-              @remove specification, handler
       for receiver in @_receivers
         receiver qualifiedName, args...
             
