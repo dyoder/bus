@@ -33,7 +33,8 @@ class Bus
     process.nextTick =>
       for specification,pattern of @_patterns
         if pattern.match qualifiedName
-          for handler in @_handlers[specification]
+          handlers = @_handlers[specification].slice(0)
+          for handler in handlers
             handler args...
             if handler.once 
               @remove specification, handler
