@@ -2,13 +2,14 @@ Bus = require "./bus"
 bus = new Bus
   
 count = 0
-repeat = 100000
+repeat = 10000
+
+for i in [1..80]
+  bus.on "foo.bar#{i}.baz", ->
 
 handler = ->
   count++
-  unless count is repeat 
-    for i in [1..20]
-      bus.once "foo.*.baz", ->
+  unless count is repeat
     bus.once "foo.*.baz", -> handler()
     bus.event "foo.#{count}.baz"
   else

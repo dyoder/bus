@@ -7,63 +7,63 @@ Testify.test "A Pattern", (context) ->
 
   context.test "with no wildcards matches", ->
     pattern = new Bus.Pattern "foo.bar"
-    assert.ok pattern.match "foo.bar"
+    assert.ok pattern.match ["foo", "bar"]
 
 
   context.test "with a trailing wildcard matches", ->
     pattern = new Bus.Pattern "foo.*"
-    assert.ok pattern.match "foo.bar"
+    assert.ok pattern.match ["foo", "bar"]
 
   context.test "with a leading wildcard matches", ->
     pattern = new Bus.Pattern "*.bar"
-    assert.ok pattern.match "foo.bar"
+    assert.ok pattern.match ["foo", "bar"]
 
   context.test "consisting of a single wild-card matches", ->
     pattern = new Bus.Pattern "*"
-    assert.ok pattern.match "foo.bar"
+    assert.ok pattern.match ["foo", "bar"]
 
 Testify.test "A mismatched Pattern", (context) ->
 
   context.test "with no wildcards doesn't match", ->
     pattern = new Bus.Pattern "bar.foo"
-    assert.ok !pattern.match "foo.bar"
+    assert.ok !pattern.match ["foo", "bar"]
 
   context.test "with a trailing wildcard doesn't match", ->
     pattern = new Bus.Pattern "bar.*"
-    assert.ok !pattern.match "foo.bar"
+    assert.ok !pattern.match ["foo", "bar"]
 
   context.test "with a leading wildcard doesn't match", ->
     pattern = new Bus.Pattern "*.foo"
-    assert.ok !pattern.match "foo.bar"
+    assert.ok !pattern.match ["foo", "bar"]
 
 Testify.test "A long Pattern", (context) ->
 
   context.test "with no wildcards matches", ->
     pattern = new Bus.Pattern "foo.bar.baz"
-    assert.ok pattern.match "foo.bar.baz"
+    assert.ok pattern.match ["foo", "bar", "baz"]
 
   context.test "with a leading wildcard matches", ->
     pattern = new Bus.Pattern "*.bar.baz"
-    assert.ok pattern.match "foo.bar.baz"
+    assert.ok pattern.match ["foo", "bar", "baz"]
 
   context.test "with a leading wildcard matches multiple elements", ->
     pattern = new Bus.Pattern "*.baz"
-    assert.ok pattern.match "foo.bar.baz"
+    assert.ok pattern.match ["foo", "bar", "baz"]
 
   context.test "with a middle wildcard matches", ->
     pattern = new Bus.Pattern "foo.*.baz"
-    assert.ok pattern.match "foo.bar.baz"
+    assert.ok pattern.match ["foo", "bar", "baz"]
 
 
 Testify.test "A long mismatched Pattern", (context) ->
 
   context.test "with a trailing wildcard doesn't match", ->
     pattern = new Bus.Pattern "bar.foo.*"
-    assert.ok !pattern.match "foo.bar.baz"
+    assert.ok !pattern.match ["foo", "bar", "baz"]
 
   context.test "with a leading wildcard doesn't match", ->
     pattern = new Bus.Pattern "*.foo"
-    assert.ok !pattern.match "foo.bar.baz"
+    assert.ok !pattern.match ["foo", "bar", "baz"]
 
   context.test "with a middle wildcard doesn't match", ->
     pattern = new Bus.Pattern "foo.*.bar"

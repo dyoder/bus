@@ -30,16 +30,18 @@ class Bus
     @_handlers = {}
     
   send: (qualifiedName,args...) ->
+    sequence = _parse(qualifiedName)
     process.nextTick =>
-      for specification,pattern of @_patterns
-        if pattern.match qualifiedName
+      for specification, pattern of @_patterns
+        if pattern.match sequence
           handlers = @_handlers[specification].slice(0)
           @_handlers[specification] = keepers = []
           for handler in handlers
             unless handler.once
               keepers.push(handler)
             handler args...
-
+            if handler.once
+              @remove specification, handler
       for receiver in @_receivers
         receiver qualifiedName, args...
             
@@ -50,24 +52,6 @@ class Bus
     
 empty = (array) -> array.length is 0
 
-_match = (spec,target) ->
-
-  return true if ((empty spec) and (empty target))
-  return false if (spec.length > target.length)
-  
-  [sfirst,srest...] = spec
-  [tfirst,trest...] = target
-  
-  if sfirst is tfirst 
-    _match srest, trest
-  else if sfirst is "*"
-    if _match srest, trest
-      true
-    else
-      _match spec, trest
-  else
-    false
-  
 _parse = (string) ->
   try
     string.split "."
@@ -79,10 +63,28 @@ class Pattern
   constructor: (pattern) ->
     @_pattern = _parse pattern
     
-  match: (qualifiedName) ->
-    target = _parse qualifiedName
-    result = _match @_pattern, target
-    result
+  _match: (wants, gots) ->
+    for want, i in wants
+      got = gots[i]
+      unless want == got || want == "*"
+        return false
+    true
+
+  match: (target) ->
+    pl = @_pattern.length
+    tl = target.length
+    if tl == 0 && pl == 0
+      true
+    else if pl > tl
+      false
+    else if pl < tl
+      if @_pattern[0] == "*"
+        index = tl - pl
+        @_match(@_pattern.slice(1), target.slice(-index))
+      else
+        false
+    else
+      @_match(@_pattern, target)
   
 
 Bus.Pattern = Pattern
