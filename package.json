@@ -1,6 +1,6 @@
 {
   "name": "node-bus",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An event bus with wildcard matching",
   "main": "bus.coffee",
   "dependencies": {
