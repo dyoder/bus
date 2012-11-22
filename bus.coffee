@@ -6,12 +6,12 @@ Catalog.add "invalid-pattern", (pattern) ->
 class Bus
   
   constructor: ->
-    @_patterns = {}
+    @_patterns = new PatternSet()
     @_handlers = {}
     @_receivers = []
     
   on: (specification,handler) ->
-    @_patterns[specification] ?= new Pattern specification
+    @_patterns.add(specification)
     @_handlers[specification] ?= []
     @_handlers[specification].push handler
     
@@ -29,17 +29,20 @@ class Bus
   reset: ->
     @_handlers = {}
     
-  send: (qualifiedName,args...) ->
-    sequence = _parse(qualifiedName)
+  send: (qualifiedName, args...) ->
     process.nextTick =>
-      for specification, pattern of @_patterns
-        if pattern.match sequence
-          handlers = @_handlers[specification].slice(0)
-          @_handlers[specification] = keepers = []
-          for handler in handlers
-            unless handler.once
-              keepers.push(handler)
-            handler args...
+      @_patterns.match qualifiedName, (specification) =>
+        handlers = @_handlers[specification].slice(0)
+        @_handlers[specification] = keepers = []
+        for handler in handlers
+          # TODO: do we need to remove unused specifications from the
+          # PatternMatcher? How to determine which specs are unused?
+          # Maybe: at end of this function, see if keepers.length > 0.
+          # If not, then we can remove both the handlers array
+          # and the pattern-matching spec
+          unless handler.once
+            keepers.push(handler)
+          handler args...
       for receiver in @_receivers
         receiver qualifiedName, args...
             
@@ -56,6 +59,23 @@ _parse = (string) ->
   catch error
     throw ((error "invalid-pattern")(string))
   
+class PatternSet
+
+  constructor: ->
+    @_patterns = {}
+
+  add: (specification) ->
+    @_patterns[specification] ?= new Pattern(specification)
+
+  remove: (specification) ->
+    delete @_patterns[specification]
+
+  match: (qualifiedName, callback) ->
+    sequence = _parse(qualifiedName)
+    for specification, pattern of @_patterns
+      if pattern.match sequence
+        callback(specification)
+
 class Pattern
   
   constructor: (pattern) ->
@@ -85,6 +105,7 @@ class Pattern
       @_match(@_pattern, target)
   
 
+Bus.PatternSet = PatternSet
 Bus.Pattern = Pattern
       
 module.exports = Bus
