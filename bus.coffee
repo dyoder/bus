@@ -35,14 +35,12 @@ class Bus
         handlers = @_handlers[specification].slice(0)
         @_handlers[specification] = keepers = []
         for handler in handlers
-          # TODO: do we need to remove unused specifications from the
-          # PatternMatcher? How to determine which specs are unused?
-          # Maybe: at end of this function, see if keepers.length > 0.
-          # If not, then we can remove both the handlers array
-          # and the pattern-matching spec
           unless handler.once
             keepers.push(handler)
           handler args...
+        if keepers.length == 0
+          delete @_handlers[specification]
+          @_patterns.remove(specification)
       for receiver in @_receivers
         receiver qualifiedName, args...
             
