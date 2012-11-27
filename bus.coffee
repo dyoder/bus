@@ -79,29 +79,24 @@ class Pattern
   constructor: (pattern) ->
     @_pattern = _parse pattern
     
-  _match: (wants, gots) ->
-    for want, i in wants
-      got = gots[i]
-      unless want == got || want == "*"
-        return false
-    true
-
   match: (target) ->
-    pl = @_pattern.length
-    tl = target.length
-    if tl == 0 && pl == 0
-      true
-    else if pl > tl
-      false
-    else if pl < tl
-      if @_pattern[0] == "*"
-        index = tl - pl
-        @_match(@_pattern.slice(1), target.slice(-index))
+    pattern = @_pattern
+    while true
+      pl = pattern.length
+      tl = target.length
+      if tl is pl is 0
+        return true
       else
-        false
-    else
-      @_match(@_pattern, target)
-  
+        [p,px...] = pattern
+        [t,target...] = target
+        if p is "*"
+          [q,qx...] = px
+          if q is t
+            pattern = qx
+        else if p is t
+          pattern = px
+        else
+          return false
 
 Bus.PatternSet = PatternSet
 Bus.Pattern = Pattern

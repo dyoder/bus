@@ -54,6 +54,11 @@ Testify.test "A long Pattern", (context) ->
     pattern = new Bus.Pattern "foo.*.baz"
     assert.ok pattern.match ["foo", "bar", "baz"]
 
+  context.test "with a middle wildcard matches multiple elements", ->
+    pattern = new Bus.Pattern "foo.*.baz"
+    assert.ok pattern.match ["foo", "bar", "blurg", "baz"]
+
+
 
 Testify.test "A long mismatched Pattern", (context) ->
 
