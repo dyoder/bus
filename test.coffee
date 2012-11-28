@@ -1,78 +1,89 @@
 Testify = require "testify"
 assert = require "assert"
 
+w = (string) ->
+  string.split(".")
+  
 Bus = require "./bus"
 
 Testify.test "A Pattern", (context) ->
 
   context.test "with no wildcards matches", ->
-    pattern = new Bus.Pattern "foo.bar"
-    assert.ok pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "foo.bar"
+    assert.ok pattern.match w "foo.bar"
 
 
   context.test "with a trailing wildcard matches", ->
-    pattern = new Bus.Pattern "foo.*"
-    assert.ok pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "foo.*"
+    assert.ok pattern.match w "foo.bar"
 
   context.test "with a leading wildcard matches", ->
-    pattern = new Bus.Pattern "*.bar"
-    assert.ok pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "*.bar"
+    assert.ok pattern.match w "foo.bar"
 
   context.test "consisting of a single wild-card matches", ->
-    pattern = new Bus.Pattern "*"
-    assert.ok pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "*"
+    assert.ok pattern.match w "foo.bar"
 
 Testify.test "A mismatched Pattern", (context) ->
 
   context.test "with no wildcards doesn't match", ->
-    pattern = new Bus.Pattern "bar.foo"
-    assert.ok !pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "bar.foo"
+    assert.ok !pattern.match w "foo.bar"
 
   context.test "with a trailing wildcard doesn't match", ->
-    pattern = new Bus.Pattern "bar.*"
-    assert.ok !pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "bar.*"
+    assert.ok !pattern.match w "foo.bar"
 
   context.test "with a leading wildcard doesn't match", ->
-    pattern = new Bus.Pattern "*.foo"
-    assert.ok !pattern.match ["foo", "bar"]
+    pattern = new Bus.Pattern w "*.foo"
+    assert.ok !pattern.match  w "foo.bar"
 
 Testify.test "A long Pattern", (context) ->
 
   context.test "with no wildcards matches", ->
-    pattern = new Bus.Pattern "foo.bar.baz"
-    assert.ok pattern.match ["foo", "bar", "baz"]
+    pattern = new Bus.Pattern w "foo.bar.baz"
+    assert.ok pattern.match  w "foo.bar.baz"
 
   context.test "with a leading wildcard matches", ->
-    pattern = new Bus.Pattern "*.bar.baz"
-    assert.ok pattern.match ["foo", "bar", "baz"]
+    pattern = new Bus.Pattern w "*.bar.baz"
+    assert.ok pattern.match  w "foo.bar.baz"
 
   context.test "with a leading wildcard matches multiple elements", ->
-    pattern = new Bus.Pattern "*.baz"
-    assert.ok pattern.match ["foo", "bar", "baz"]
+    pattern = new Bus.Pattern w "*.baz"
+    assert.ok pattern.match  w "foo.bar.baz"
 
   context.test "with a middle wildcard matches", ->
-    pattern = new Bus.Pattern "foo.*.baz"
-    assert.ok pattern.match ["foo", "bar", "baz"]
+    pattern = new Bus.Pattern w "foo.*.baz"
+    assert.ok pattern.match  w "foo.bar.baz"
 
   context.test "with a middle wildcard matches multiple elements", ->
-    pattern = new Bus.Pattern "foo.*.baz"
-    assert.ok pattern.match ["foo", "bar", "blurg", "baz"]
+    pattern = new Bus.Pattern w "foo.*.baz"
+    assert.ok pattern.match  w "foo.bar-1.bar-2.baz"
 
 
 
 Testify.test "A long mismatched Pattern", (context) ->
 
   context.test "with a trailing wildcard doesn't match", ->
-    pattern = new Bus.Pattern "bar.foo.*"
-    assert.ok !pattern.match ["foo", "bar", "baz"]
+    pattern = new Bus.Pattern w "bar.foo.*"
+    assert.ok !pattern.match  w "foo.bar.baz"
 
   context.test "with a leading wildcard doesn't match", ->
-    pattern = new Bus.Pattern "*.foo"
-    assert.ok !pattern.match ["foo", "bar", "baz"]
+    pattern = new Bus.Pattern w "*.foo"
+    assert.ok !pattern.match  w "foo.bar.baz"
+
+  context.test "with a leading wildcard doesn't match (no common elements)", ->
+    pattern = new Bus.Pattern w "*.foo"
+    assert.ok !pattern.match  w "blurg.bar.baz"
 
   context.test "with a middle wildcard doesn't match", ->
-    pattern = new Bus.Pattern "foo.*.bar"
-    assert.ok !pattern.match "foo.bar.baz"
+    pattern = new Bus.Pattern w "foo.*.bar"
+    assert.ok !pattern.match  w "foo.bar.baz"
+    
+  context.test "with zero wildcard matches doesn't match", ->
+    pattern = new Bus.Pattern w "*.foo.bar.baz"
+    assert.ok !pattern.match w "foo.bar.baz"
 
 
 # Tests must be asynchronous

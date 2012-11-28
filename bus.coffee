@@ -63,7 +63,7 @@ class PatternSet
     @_patterns = {}
 
   add: (specification) ->
-    @_patterns[specification] ?= new Pattern(specification)
+    @_patterns[specification] ?= new Pattern _parse specification
 
   remove: (specification) ->
     delete @_patterns[specification]
@@ -74,30 +74,35 @@ class PatternSet
       if pattern.match sequence
         callback(specification)
 
-class Pattern
-  
-  constructor: (pattern) ->
-    @_pattern = _parse pattern
-    
-  match: (target) ->
-    pattern = @_pattern
-    while true
-      pl = pattern.length
-      tl = target.length
-      if tl is pl is 0
+_match = (pattern,target) ->
+  pl = pattern.length
+  tl = target.length
+  if pl is tl is 0
+    return true
+  else if pl is 0 or tl is 0
+    return false
+  else
+    [p,px...] = pattern
+    [t,tx...] = target
+    if p is "*"
+      if _match px, tx
         return true
       else
-        [p,px...] = pattern
-        [t,target...] = target
-        if p is "*"
-          [q,qx...] = px
-          if q is t
-            pattern = qx
-        else if p is t
-          pattern = px
-        else
-          return false
-
+        _match pattern, tx
+    else if p is t
+      _match px, tx
+    else
+      return false
+  
+class Pattern
+  
+  constructor: (@_pattern) ->
+    
+  match: (target) ->
+    _match(@_pattern,target)
+        
+    
+    
 Bus.PatternSet = PatternSet
 Bus.Pattern = Pattern
       
