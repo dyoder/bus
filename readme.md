@@ -1,14 +1,31 @@
 # Get On The Bus
 
-Bus is like Event Emitter, except with wildcard matching. The purpose is to allow co-operating components to share a single event bus by effectively making it possible to namespace the events on the bus and for client code to subscribe to "families" of events.
+You can think of Bus like `EventEmitter` except that you can create hierarchies of event handlers and unhandled events "bubble" up the hierarchy.
 
+    {readFile} = require "fs"
     Bus = require "./bus"
+
     bus = new Bus
-    bus.on "*.error", (error) -> 
-      {name,message} = error
-      console.log "#{name}: #{message}"
-    bus.emit "foo.bar.error", new Error "Ruh-roh!"
-    
+    bus.on "error", (error) -> console.log "General error"
+
+    file = bus.scope()
+    file.on "error", (error) -> console.log "File error"
+    readFile = file.callback readFile
+
+    # This one will print 'File read'
+    channel = readFile "readme.md"
+    channel.on "success", (file) ->
+      console.log "File read"
+  
+    # This one will print 'File error'
+    channel = readFile "readme.mdx"
+    channel.on "success", (file) ->
+      console.log "File read"
+
+    # This one will print 'General error'
+    bad = bus.scope()
+    bad.send "error", new Error "mhmm"    
+
 # Installation
 
 Just use npm:
