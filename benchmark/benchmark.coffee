@@ -1,12 +1,10 @@
-Bus = require "./bus"
+Bus = require "../src/bus"
 bus = new Bus
-foo = bus.scope()
-bar = foo.scope()
+foo = bus.channel "foo"
+bar = foo.channel "bar"
   
 count = 0
 repeat = 10000
-
-bar._events.setMaxListeners 1000
 
 for i in [1..1000]
   bar.on "baz", ->
@@ -14,7 +12,7 @@ for i in [1..1000]
 handler = ->
   count++
   unless count is repeat
-    foo.once "baz", -> handler()
+    foo.once "*.baz", handler
     bar.send "baz"
   else
     finish = Date.now()
