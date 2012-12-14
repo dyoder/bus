@@ -6,9 +6,9 @@ bar = foo.scope()
 count = 0
 repeat = 10000
 
-bar._events.setMaxListeners 80
+bar._events.setMaxListeners 1000
 
-for i in [1..80]
+for i in [1..1000]
   bar.on "baz", ->
 
 handler = ->

@@ -1,66 +1,59 @@
-{EventEmitter} = require "events"
+{EventEmitter2} = require "eventemitter2"
+{delegate,merge,toError} = require "fairmont"
 
-class Channel
+class Bus extends EventEmitter2
   
-  constructor: (@parent=null) ->
-    @_events = new EventEmitter
+  constructor: (@options={}) ->
+    {@parent, @name} = options
+    super options
+    
+  # We override emit because we need to propagate this
+  # event to the parent ...
+  emit: (event,args...) ->
+    super event, args...
+    event = if @name then "#{@name}.#{event}" else event
+    @parent.emit event, args... if @parent?
 
+  # Triggering an event with ::send fires it on next tick.
+  # This preserves the meaning of ::emit, while allowing 
+  # us to provide a uniform interface for events if we
+  # want, even if an event is synchronous
   send: (event,args...) ->
     process.nextTick =>
       @emit event, args...
 
-  emit: (event,args...) ->
-
-    if @_receiver?
-      @_receiver event, args...
-
-    @_events.emit event, args...
-    @parent.emit event, args... if @parent?
-    
-    # if @_events.listeners(event).length is 0
-    #   if @parent?
-    #     @parent.send event, args...
-    # else
-    #   process.nextTick =>
-    #     # we use 'emit' instead of just iterating
-    #     # through the handlers because that way
-    #     # we can re-use the EventEmitter logic
-    #     @_events.emit event, args...
-
-  receive: (fn) ->
-    @_receiver = fn
-
-  # For channels, an on handler is a once handler
-  on: (event,handler) -> @once event,handler
-
-  once: (event,handler) ->
-    @_events.once event, handler
-
-
-class Bus extends Channel
+  # Create a new bus, with this one as the parent.
+  channel: (name=null) -> 
+    new Bus (merge @options, parent: @, name: name)
   
-  scope: -> new Bus @
-  
-  channel: -> new Channel @
-  
-  # emitter: (emitter) -> 
-  #   self = @
-  #   emit = @emitter.emit
-  #   @emitter.emit = (event,args...) ->
-  #     self.send event, args...
-  #     emit.apply @, [event,args...]
-  #     
-  callback: (fn) ->
+  # Generate a callback function that will translate the
+  # callback into a success or error event.
+  callback: ->
     (args...) =>
       channel = @channel()
       fn args..., (error,results...) =>
         unless error?
           channel.emit "success", results...
         else
-          channel.emit "error", error
+          channel.emit "error", (toError error)
       channel
+     
+  # Bind an event emitter so that any events it fires will
+  # become bus events. 
+  emitter: (emitter) -> 
+    self = @
+    emit = emitter.emit
+    emitter.emit = (event,args...) ->
+      emit.call @, event, args...
+      self.send event, args...
+    emitter
     
-  on: (event,handler) ->
-    @_events.on event, handler
-
+  # Wrap a function in a try-catch and convert errors to 
+  # events.
+  safely: (fn) ->
+    try
+      fn()
+    catch error
+      @send "error", (toError error)
+      
 module.exports = Bus
