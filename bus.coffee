@@ -52,7 +52,7 @@ class Bus extends EventEmitter2
   # events.
   safely: (fn) ->
     try
-      fn()
+      @send "success", fn()
     catch error
       @send "error", (toError error)
       
