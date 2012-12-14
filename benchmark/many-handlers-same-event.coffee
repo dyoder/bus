@@ -1,24 +1,17 @@
 Bus = require "../src/bus"
 bus = new Bus
-foo = bus.channel "foo"
-bar = foo.channel "bar"
   
-count = 0
-repeat = 10000
-
 for i in [1..1000]
-  bar.on "baz", ->
+  bus.on "baz", ->
 
-handler = ->
-  count++
+handler = (count,repeat) ->
   unless count is repeat
-    foo.once "*.baz", handler
-    bar.send "baz"
+    bus.once "foo", handler
+    bus.send "foo", ++count, repeat
   else
     finish = Date.now()
     duration = finish - start
     console.log "#{duration/repeat} ms per iteration"
 
-
 start = Date.now()
-handler()
+handler 1, 10000

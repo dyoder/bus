@@ -1,5 +1,5 @@
 {readFile} = require "fs"
-Bus = require "./bus"
+Bus = require "../src/bus"
 
 bus = new Bus
 bus.on "*.error", (error) -> console.log "General error"

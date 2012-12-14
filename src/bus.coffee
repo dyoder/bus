@@ -12,10 +12,10 @@ class Bus extends Emitter
   # We override emit because we need to propagate this
   # event to the parent ...
   emit: (event,args...) ->
-    do (event) ->
-      event = if @name then "#{@name}.#{event}" else event
-      @parent.emit event, args... if @parent?
     super event, args...
+    if @parent?
+      event = if @name then "#{@name}.#{event}" else event
+      @parent.emit event, args...
 
   # Create a new bus, with this one as the parent.
   channel: (name=null) -> 

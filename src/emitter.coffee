@@ -60,7 +60,12 @@ class Emitter
     handler.once = true
     @on specification, handler
 
-  receive: (specification, handler) ->
+  receive: (args...) ->
+    if args.length is 1
+      specification = "*"
+      [handler] = args
+    else
+      [specification,handler] = args
     handler = (_toHandler handler)
     handler.receiver = true
     @on specification, handler
@@ -87,7 +92,11 @@ class Emitter
   emit: (event, args...) ->
     specifications = @_patterns.match event, (specification) =>
       handlers = _copyArray @_handlers[specification]
-      keepers = []
+      
+      # This construction is necessary to ensure we can add/remove event 
+      # handlers from within other handlers ...
+      @_handlers[specification] = keepers = []
+
       for handler in handlers
         unless handler.once
           keepers.push handler
@@ -103,7 +112,8 @@ class Emitter
         @removeAll specification
 
   send: (event,args...) ->
-    process.nextTick => @emit event, args...
+    process.nextTick => 
+      @emit event, args...
 
   
   _setTimeout: (specification,handler) ->
